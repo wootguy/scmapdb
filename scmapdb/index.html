@@ -1,0 +1,77 @@
+<html>
+	<head>
+	<style>
+		.main {
+			margin: 20px auto;
+			text-align: left;
+			color: #eee;
+			max-width: 600px;
+		}
+		h1, h2 {
+			text-align: center;
+		}
+		ul {
+			text-align: left;
+		}
+		a {
+			color: #0bb;
+			text-decoration: none;
+		}
+		a:hover {
+			color: #6ff;
+		}
+		body {
+			background: #000;
+		}
+        .warn {
+            color: #dd4;
+        }
+	</style>
+	</head>
+	<body>
+		<div class="main">
+			<h1>SCMapDB Resources</h1>
+			<hr>
+			<br>
+			
+			<h2>The Bigger One</h2>
+			The ultimate Sven Co-op map pack (a successor to <a href="http://scmapdb.com/mappack:the-big-one-sc-v2">The Big One</a>). It includes every map uploaded to SCMapDB. More than that, it fixes tons of <a href="log.html#&&222220032">problems</a> present in the individual map archives.
+			<br><br>
+			Download (updated weekly, usually):
+			<!--
+			<div>
+				<a class="zip-link" href="https://drive.google.com/uc?id=1786ZiI9CKDrmBWASkn2bi-aDttk2EW8v&export=download">SCMapDB_2019_09_10.zip</a> (9.6 GB)
+			</div>
+			-->
+			<div>
+				<a class="7z-link" href="https://drive.google.com/uc?id=1a9spgdMiz7vSec4YESCwUn7hRffCGaBq&export=download">SCMapDB_2020_01_14.7z</a> (573.6 KB)
+			</div>
+            
+            <br>
+            <div class="warn">Warning: This map pack is WIP and I haven't announced that it exists yet because SCMapDB has lots of <a href="/scmapdb/pool.html#&&&21211111111">conflicting files</a>. Some maps won't work properly until all conflicts are resolved.</div>
+			
+			<br><br><br>
+			<h2 id="repacker">Repack Tool</h2>
+			A <a href="/scmapdb/scmapdb.py">script</a> on this server downloads and repacks every map on <a href="http://scmapdb.com/">SCMapDB</a> to fix various problems, such as:
+			<ul>
+				<li>missing files</li>
+				<li>unused files</li>
+				<li>broken .res files</li>
+				<li>files that override default content</li>
+				<li>inconsistent folder layouts</li>
+				<li>incorrectly placed/named files</li>
+			</ul>
+			The bulk of the work is done by <a href="https://github.com/wootguy/resguy">resguy</a>. The script runs every hour to check for updates.
+			<h3><a href="log.html">Repack results</a></h3>
+			A filterable/searchable list of all maps that were repacked by the tool, each with a detailed view of changes.
+			<br><br>
+			IMPORTANT: maps with scripts in them may be repacked incorrectly. 
+			It's sometimes impossible to know which files a script precaches, so the repacker likely deletes more than it should. 
+			For maps with scripts, the Big One Map pack will include all "unused" files in case some of them are actually required.
+			<h3><a href="pool.html">Content pool</a></h3>
+			A filterable/searchable list of every file that custom maps include. Files in this pool are used to recover missing files in map archives.
+			<br><br>
+			Each file entry lists the map(s) that reference it. Files highlighted in red are conflicted and require a manual repack to fix.
+		</div>
+	</body>
+</html>

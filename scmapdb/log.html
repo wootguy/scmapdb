@@ -1,0 +1,197 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>SCMapDB Repack Results</title>
+	<link rel="stylesheet" href="log.css" type="text/css">
+	<script src="jquery.js"></script>
+	<script src="log.js"></script>
+</head>
+
+<body>
+	<div class="heading">
+		<h1>SCMapDB Repack Results</h1>
+		<a href="pool.html">Go to "Content Pool"</a>
+		<h2 class="num-maps-container invisible">Total Maps: <span class="num-maps">0</span></h2>
+	</div>
+	<div class="controls hidden">
+		<hr>
+		<div class="filter-container">
+			<div class="filter-search">
+				<span class="search-text">Filter map name:<input class="map-filter" type="text"></span>
+				<span class="search-text">Filter author name:<input class="author-filter" type="text"></span>
+			</div>
+			<table class="radio-table-left">
+				<tr>
+					<td>Has missing files:</td>
+					<td><input type="radio" name="miss-radio" value="1">Yes</td>
+					<td><input type="radio" name="miss-radio" value="0">No</td>
+					<td><input type="radio" name="miss-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Has recovered files:</td>
+					<td><input type="radio" name="rec-radio" value="1">Yes</td>
+					<td><input type="radio" name="rec-radio" value="0">No</td>
+					<td><input type="radio" name="rec-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Has deleted files:</td>
+					<td><input type="radio" name="del-radio" value="1">Yes</td>
+					<td><input type="radio" name="del-radio" value="0">No</td>
+					<td><input type="radio" name="del-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Has moved files:</td>
+					<td><input type="radio" name="mov-radio" value="1">Yes</td>
+					<td><input type="radio" name="mov-radio" value="0">No</td>
+					<td><input type="radio" name="mov-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Has RES changes:</td>
+					<td><input type="radio" name="res-radio" value="1">Yes</td>
+					<td><input type="radio" name="res-radio" value="0">No</td>
+					<td><input type="radio" name="res-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Has download links:</td>
+					<td><input type="radio" name="dl-radio" value="1">Yes</td>
+					<td><input type="radio" name="dl-radio" value="0">No</td>
+					<td><input type="radio" name="dl-radio" value="2" checked>Both</td>
+				</tr>
+			</table>
+			<table class="radio-table-right">
+				<tr>
+					<td>Only in map pack:</td>
+					<td><input type="radio" name="pack-radio" value="1">Yes</td>
+					<td><input type="radio" name="pack-radio" value="0">No</td>
+					<td><input type="radio" name="pack-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Is default map:</td>
+					<td><input type="radio" name="default-radio" value="1">Yes</td>
+					<td><input type="radio" name="default-radio" value="0">No</td>
+					<td><input type="radio" name="default-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Is perfect archive:</td>
+					<td><input type="radio" name="perfect-radio" value="1">Yes</td>
+					<td><input type="radio" name="perfect-radio" value="0">No</td>
+					<td><input type="radio" name="perfect-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Is scripted:</td>
+					<td><input type="radio" name="script-radio" value="1">Yes</td>
+					<td><input type="radio" name="script-radio" value="0">No</td>
+					<td><input type="radio" name="script-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Overwrites default content:</td>
+					<td><input type="radio" name="overwrite-radio" value="1">Yes</td>
+					<td><input type="radio" name="overwrite-radio" value="0">No</td>
+					<td><input type="radio" name="overwrite-radio" value="2" checked>Both</td>
+				</tr>
+			</table>
+		</div>
+		<hr>
+		<div class="sort-container">
+			<div class="sort-selects">
+				Sort by:
+				<select class="sort-type">
+					<option value="edit-time">Edit time</option>
+					<option value="map">Map name</option>
+					<option value="author">Author name</option>
+					<option value="issues">Problems</option>
+				</select>
+				<select class="sort-dir">
+					<option value="up">Ascending</option>
+					<option value="down" selected>Descending</option>
+				</select>
+			</div>
+			
+			<div class="max-page-amt-container">
+				Results per page: <input class="max-page-amt" type="text" maxlength="4" size="4" value="20">
+			</div>
+			<label class="rape-label" title="Rainbow effect for perfect archives"><input class="eye-rape" type="checkbox" checked>Eye rape</label>
+		</div>
+		<input class="compare-btn hidden" type="button" value="Compare">
+		<div class="page-num-container">
+			<span class="page-far page-first-container"><span class="page-bar"></span><span class="page-first"></span></span>
+			<span class="page-close page-prev-container"><span class="page-prev"></span></span>
+			<span class="page-num-text"><span class="page-start">1</span> - <span class="page-end">X</span> of <span class="map-tot">Y</span></span>
+			<span class="page-close page-next-container"><span class="page-next"></span></span>
+			<span class="page-far page-last-container"><span class="page-last"></span><span class="page-bar"></span></span>
+			<a class="share" href="#" title="Right click and copy this link to share it">Share these results</a>
+		</div>
+	</div>
+	<div class="loader"></div>
+	<h2 class="loader-text">Loading <span class="load-count">0</span> of <span class="load-total">0</span> (<span class="load-percent">0</span>%)</h2>
+	<div id="accordion"></div>
+	<div class="footer"></div>
+	<input type="submit" class="load-all-btn hidden" value="View results for all maps"/>
+</body>
+
+
+<div class="template">
+	<div class="container">
+		<h3 class="expandable">
+			<div class="title"><span class="mapname">Mapname</span><span class="author"></span></div>
+			<div class="counts pack add" title="Map can only be found in a map pack"></div>
+			<div class="counts infos mod" title="Number of file moves and RES file changes"></div> 
+			<div class="counts warnings mov" title="Number of files that were removed from the archive"></div> 
+			<div class="counts recs rec" title="Number of files that were missing, but were recovered from other maps"></div> 
+			<div class="counts errors rem" title="Number of required map files that can't be found"></div>
+			<div class="counts perfect rape" title="Archive has no problems!"></div>
+			<div class="counts scripted" title="resguy cannot reliably find resources used in scripts.&#013;&#013;This repack may have deleted more files than it should have,&#013;and some missing files may have gone undetected,&#013;and some missing files might not actually be missing.""></div>
+			<div style="clear:both;"></div>
+		</h3>
+		
+		<div class="summary">
+			<a class="old-archive">Download Original<br>(<span class="size"></span>)</a>
+			<a class="ext-archive">Download Extras<br>(<span class="size"></span>)</a>
+			
+			<a class="new-archive">Download Repack<br>(<span class="size"></span>)</a>
+			<br><br><hr><br>
+			<h3 class="old-tree-title left">Original Archive (<span class="mod">0 Moved</span>, <span class="mov">0 Deleted</span>)</h3>
+			<h3 class="new-tree-title">Repacked Archive (<span class="add">0 Added</span>, <span class="rec">0 Recovered</span>)</h3>
+			<div class="trees">
+				<div class="tree old-tree"></div>
+				<div class="tree new-tree"></div>
+			</div>
+			<br><br>
+			<h3 class="left">Resguy Log (<span class="missing-text">0 missing files</span>)</h3>
+			<h3 class="diff-title">RES Changes (<span class="add">0 Added</span>, <span class="rem">0 Removed</span>)</h3>
+			<div class="res-container">
+				<div class="res-block res-log"></div>
+				<div class="res-block res-diff"></div>
+			</div>
+			<br>
+			<div class="db-page-container">
+				<a class="share" href="#" title="Right click and copy this link to share it">Share this result</a>
+				<a class="db-page" target="_blank">View SCMapDB page</a>
+				<span class="scrape">Revision <span class="rev"></span> - <span class="date"></span></span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php echo "LOLTEST"; ?>
+
+<p class="last-pack">
+	Last updated: ???
+<br><span class="repack_but">Update Now</span></p>
+
+<div class="repack-dialog hidden">
+	<div class="title">
+		<div class="status">
+			<span class="status-text">Repacking</span><div class="loader2"></div>
+		</div>
+	</div>
+	<br>
+	<div class="output"></div>
+	<br>
+	<div class="buttons">
+		<button type="button">Refresh Page</button>
+	</div>
+</div>
+
+</html>
