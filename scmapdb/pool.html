@@ -1,0 +1,87 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	
+	<title>SCMapDB Content Pool</title>
+	<link rel="stylesheet" href="log.css" type="text/css">
+	<script src="jquery.js"></script>
+	<script src="pool.js"></script>
+</head>
+
+<body>
+	<div class="heading">
+		<h1>SCMapDB Content Pool</h1>
+		<a href="log.html">Go to "Repack Results"</a>
+		<h2 class="num-maps-container invisible">Total Files: <span class="num-maps">0</span></h2>
+	</div>
+	<div class="controls">
+		<hr>
+		<div class="filter-container">
+			<table class="radio-table-left">
+				<tr>
+					<td>Shared with 2+ maps:</td>
+					<td><input type="radio" name="share-radio" value="1">Yes</td>
+					<td><input type="radio" name="share-radio" value="0">No</td>
+					<td><input type="radio" name="share-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Has conflicts:</td>
+					<td><input type="radio" name="old-radio" value="1">Yes</td>
+					<td><input type="radio" name="old-radio" value="0">No</td>
+					<td><input type="radio" name="old-radio" value="2" checked>Both</td>
+				</tr>
+				<tr>
+					<td>Is unused (extra):</td>
+					<td><input type="radio" name="extra-radio" value="1">Yes</td>
+					<td><input type="radio" name="extra-radio" value="0">No</td>
+					<td><input type="radio" name="extra-radio" value="2" checked>Both</td>
+				</tr>
+			</table>
+			<table class="radio-table-right">
+				<tr>
+					<td>Filter by Filename:</td>
+					<td><input class="name-filter" type="text"></td>
+				</tr>
+				<tr>
+					<td>Filter by Author:</td>
+					<td><input class="author-filter" type="text"></td>
+				</tr>
+				<tr>
+					<td>Filter by CRC-32:</td>
+					<td><input class="crc-filter" type="text"></td>
+				</tr>
+			</table>
+		</div>
+		<table class="ftype-table">
+			<tr>
+				<td>Filter File Type:</td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="1" checked exts="bsp">Maps</label></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="2" checked exts="mdl">Models</label></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="3" checked exts="spr">Sprites</label></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="4" checked exts="aiff asf asx au dls flac fsb it m3u mid midi mod mp2 mp3 ogg pls s3m vag wav wax wma xm">Sounds</label></td>
+				<td><input class="ftype-on-btn" type="button" value="Select All"></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="5" checked exts="as">Scripts</label></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="6" checked exts="wad">Wads</label></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="7" checked exts="txt cfg conf gmr gsr save">Text</label></td>
+				<td><label class="ftype-label"><input class="ftype" type="checkbox" i="8" checked exts="tga bmp">Bitmaps</label></td>
+				<td><input class="ftype-off-btn" type="button" value="Deselect All"></td>
+			</tr>
+		</table>
+		<hr>
+		<input class="expand-btn" type="button" value="Expand All">
+		<input class="collapse-btn" type="button" value="Collapse All">
+	</div>
+	<div class="results-container invisible">
+		<div class="num-results">??? Results</div>
+		<a class="share" href="#" title="Right click and copy this link to share it">Share these results</a>
+	</div>
+	<div class="loader"></div>
+	<h2 class="loader-text"><span class="load-action">Loading</span> <span class="load-count">0</span> of <span class="load-total">0</span> (<span class="load-percent">0</span>%)</h2>
+	<div id="file-tree" class="tree"></div>
+	<div class="footer"></div>
+</body>
+
+</html>
