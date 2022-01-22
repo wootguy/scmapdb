@@ -3,6 +3,12 @@
 # There's a bug somewhere that causes file handles to build up, so you might need to 
 # set "ulimit -n" to something high like 4096 (1024 isn't enough), make sure to do it for root too if using crontab
 
+# TODO / Feature requests:
+# scmapdb repack file recovered but it overwrites default content (decay I think, point_checkpoint.as)
+# scmapdb add "unreleased" category
+
+
+
 from lxml import html
 from lxml import etree
 from datetime import datetime
@@ -18,6 +24,7 @@ use_cache = True
 force_zip_cache = False # always use zip cache, even if it's out of date
 debug_zip = False
 debug_repack = False # Don't delete the "repack" folder
+unpack_nested = False # unpack nested archives
 include_extras = False # move extras to a special subfolder instead of deleting them
 verbose = True
 log_to_file = True
@@ -528,6 +535,7 @@ def validate_archive(archive_path):
 
 def extract_archive(archive_path, out_path, bsp_name=""):
 	global debug_zip
+	global unpack_nested
 	
 	if not os.path.exists(out_path):
 		os.makedirs(out_path)
@@ -594,7 +602,7 @@ def extract_archive(archive_path, out_path, bsp_name=""):
 	nested_archives = list(find_files(out_path, '*.rar'))
 	nested_archives += list(find_files(out_path, '*.zip'))
 	nested_archives += list(find_files(out_path, '*.7z'))
-	if len(nested_archives) > 0:
+	if unpack_nested and len(nested_archives) > 0:
 		nested = nested_archives[0]
 		print('Unpacking nested archive: %s' % nested)
 		os.remove(archive_path)
@@ -1968,7 +1976,8 @@ def create_content_pool(bigone_mode=False, map_packs_only=False, bigone_extras=F
 		f.close()
 		
 		now = datetime.now()
-		out_name = 'scmapdb.zip'
+		#out_name = 'scmapdb.zip'
+		out_name = 'scmapdb.7z'
 		if os.path.isfile(out_path):
 			os.remove(out_path)
 			
@@ -1976,7 +1985,8 @@ def create_content_pool(bigone_mode=False, map_packs_only=False, bigone_extras=F
 		try:
 			print("Compressing %s..." % out_name)
 			with open(os.devnull, 'w') as devnull:
-				args = [program_path, 'a', '-mx1', '-tzip', '-mmt', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
+				#args = [program_path, 'a', '-mx1', '-tzip', '-mmt', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
+				args = [program_path, 'a', '-mx9', '-t7z', '-mmt=3', '-md=32m', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
 				subprocess.check_call(args)
 		except Exception as e:
 			print(e)
@@ -2464,14 +2474,14 @@ def export_map_detail(mapKey):
 	
 	log_path = os.path.join("logs", safe_map_name(mapKey) + ".json")
 	detail_json = {}
-	detail_json['resguy_log'] = value['resguy_log']
-	detail_json['old_files'] = value['old_files']
-	detail_json['new_files'] = value['new_files']
-	detail_json['res_diff'] = value['res_diff']
-	detail_json['rating'] = value['rating']
-	detail_json['votes'] = value['votes']
-	detail_json['scrape_date'] = value['scrape_date']
-	detail_json['release_date'] = value['release_date']
+	detail_json['resguy_log'] = value['resguy_log'] if 'resguy_log' in value else None
+	detail_json['old_files'] = value['old_files'] if 'old_files' in value else None
+	detail_json['new_files'] = value['new_files'] if 'new_files' in value else None
+	detail_json['res_diff'] = value['res_diff'] if 'res_diff' in value else None
+	detail_json['rating'] = value['rating'] if 'rating' in value else None
+	detail_json['votes'] = value['votes'] if 'votes' in value else None
+	detail_json['scrape_date'] = value['scrape_date'] if 'scrape_date' in value else None
+	detail_json['release_date'] = value['release_date'] if 'release_date' in value else None
 	
 	if 'extras_size' in value:
 		detail_json['extras_size'] = value['extras_size']
@@ -2654,7 +2664,7 @@ def clean_exit():
 	
 args = sys.argv[1:]
 	
-if len(args) == 1 and args[0].lower() == 'help':
+if len(args) < 1 or args[0].lower() == 'help':
 	print("\nUsage:")
 	print("sudo python3 scmapdb.py [command]\n")
 	
