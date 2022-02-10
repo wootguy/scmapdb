@@ -1,0 +1,9 @@
+# Some maps have download links that point to hotfixes or extra files
+# This file identifies which links point to the full map package
+# The format is mapname=[link index]
+# Usually the first link (index=0) points to the full package
+
+workplace=1
+
+# This page should really just be an older version on the other page, but authors might get mad
+afraid-of-monsters=0

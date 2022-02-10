@@ -94,6 +94,10 @@ LIFTABLE_FLAG = 1024
 all_maps = get_all_maps(maps_dir)
 broken_maps = []
 
+skip_maps = []
+with open("mapcycle.txt") as f:
+	skip_maps = f.read().splitlines()
+
 last_progress_str = ''
 for idx, map_name in enumerate(all_maps):
 	map_path = os.path.join(maps_dir, map_name)
@@ -105,12 +109,13 @@ for idx, map_name in enumerate(all_maps):
 	last_progress_str = progress_str
 	print(padded_progress_str, end='\r')
 	
+	if map_name.lower().replace(".bsp", "") in skip_maps:
+		continue
+	
 	for ent in load_entities(map_path):
-		if ('classname' in ent and '_osprey' in ent['classname'] or
-		   'monstertype' in ent and '_osprey' in ent['monstertype'] or
-		   'm_iszCrtEntChildClass' in ent and '_osprey' in ent['m_iszCrtEntChildClass']):
+		if ('classname' in ent and ('monster_' in ent['classname'])) and 'spawnflags' in ent and int(ent['spawnflags']) & 1 != 0:
 			broken_maps.append(map_name)
-			print("\nOH NO %s" % map_name)
+			print("\nMATCHED %s" % map_name)
 			break
 	
 	'''
@@ -122,6 +127,6 @@ for idx, map_name in enumerate(all_maps):
 				break
 	'''
 
-print("\n\nMaps that might be broken now:")
+print("\n\nResults:")
 for map in broken_maps:
 	print(map)
