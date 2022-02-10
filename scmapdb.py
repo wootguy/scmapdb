@@ -47,11 +47,12 @@ default_content_fname = 'resguy_default_content.txt'
 map_download_dir = 'downloads'
 map_pool_dir = 'content_pool'
 old_pool_dir = 'old_content' # old versions of files go here
-bigone_dir = '/media/sda1/scmapdb/bigone'
+bigone_dir = 'bigone'
 bifone_extras_dir = 'bigone_extras'
 map_repack_dir = os.path.join(map_download_dir, 'repack')
 map_pack_dir = os.path.join(map_download_dir, 'map_packs')
 cache_dir = 'cache'
+logs_dir = 'logs'
 map_cache_dir = os.path.join(cache_dir, 'maps')
 map_pack_cache_dir = os.path.join(cache_dir, 'map_packs')
 page_cache_dir = os.path.join(cache_dir, 'pages')
@@ -989,7 +990,14 @@ def repack_map_from_map_pack(mapname, bsp_filenames, packname):
 	map_json['new_size'] = os.path.getsize(out_path);
 	
 	return True
-		
+
+# set default file/folder permissions recursively
+def fix_file_perms(path):
+	for subdir, dirs, files in os.walk(path):
+		for dir in dirs:
+			os.chmod(os.path.join(subdir, dir), stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+		for file in files:
+			os.chmod(os.path.join(subdir, file), stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH)
 	
 def download_map(mapname, skip_cache=False):
 	global use_cache
@@ -1117,13 +1125,6 @@ def find_files(directory, pattern):
 				filename = os.path.join(root, basename)
 				yield filename
 				
-def find_dirs(directory):
-	import os, fnmatch
-	for root, dirs, files in os.walk(directory):
-		for basename in dirs:
-			filename = os.path.join(root, basename)
-			yield filename
-	
 def fix_asset_capitalization(path, rename=False, repack_dir=map_repack_dir):
 	# correct the destination path
 	old_parts = path.split(os.sep)
@@ -1504,8 +1505,7 @@ def repack_map(mapname, ext, bsp_name=""):
 	print("Repacking %s..." % mapname)
 	
 	if os.path.exists(map_repack_dir):
-		for dir in find_dirs(map_repack_dir):
-			os.chmod(dir, stat.S_IWRITE)
+		fix_file_perms(map_repack_dir)
 		shutil.rmtree(map_repack_dir)
 	
 	if not os.path.exists(map_repack_dir):
@@ -1515,6 +1515,8 @@ def repack_map(mapname, ext, bsp_name=""):
 		os.remove(archive_path)
 		shutil.rmtree(map_repack_dir)
 		raise TypeError
+	
+	fix_file_perms(map_repack_dir)
 	
 	no_issues = True
 	
@@ -1761,8 +1763,6 @@ def repack_map(mapname, ext, bsp_name=""):
 	
 	# cleanup
 	if not debug_repack:
-		for dir in find_dirs(map_repack_dir):
-			os.chmod(dir, stat.S_IWRITE)
 		shutil.rmtree(map_repack_dir)
 		if archive_path != out_path:
 			os.remove(archive_path)
@@ -2472,7 +2472,7 @@ def export_map_detail(mapKey):
 		
 	print("Exporting map detail")
 	
-	log_path = os.path.join("logs", safe_map_name(mapKey) + ".json")
+	log_path = os.path.join(logs_dir, safe_map_name(mapKey) + ".json")
 	detail_json = {}
 	detail_json['resguy_log'] = value['resguy_log'] if 'resguy_log' in value else None
 	detail_json['old_files'] = value['old_files'] if 'old_files' in value else None
@@ -2747,6 +2747,9 @@ if len(args) > 0:
 			
 	load_the_big_guys()
 	
+	if args[0].lower() == 'fixperms':
+		fix_file_perms('.')
+		os.chmod('resguy', stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 	if args[0].lower() == 'pool':
 		create_content_pool()
 	if args[0].lower() == 'pool_packs':
@@ -2768,7 +2771,7 @@ if len(args) > 0:
 			get_map_urls(map, skip_cache=True)
 	if args[0].lower() == 'test':
 		for idx, map in enumerate(all_maps[0:]):
-			detail_json_name = 'logs/' + safe_map_name(map) + '.json'
+			detail_json_name = logs_dir + '/' + safe_map_name(map) + '.json'
 			detail_json = None
 			rev = 0
 			if os.path.exists(detail_json_name):
@@ -2834,6 +2837,14 @@ if len(args) > 0:
 		remove_unreferenced_pool_files()
 		with open(pool_json_name, 'w') as outfile:
 			json.dump(pool_json, outfile)
+			
+		print("")
+		print("Pushing changes to github")
+		subprocess.run(['git', 'add', logs_dir])
+		subprocess.run(['git', 'add', 'data.json'])
+		subprocess.run(['git', 'add', 'pool.json'])
+		subprocess.run(['git', 'commit', '-m', 'automatic update'])
+		subprocess.run(['git', 'push'])
 		
 		print("")
 		print("UPDATE COMPLETE")
@@ -2877,11 +2888,6 @@ if use_cache:
 		os.makedirs(map_pack_cache_dir)
 	if not os.path.exists(page_cache_dir):
 		os.makedirs(page_cache_dir)
-	
-if os.path.exists(map_repack_dir):
-	for dir in find_dirs(map_repack_dir):
-		os.chmod(dir, stat.S_IWRITE)
-	shutil.rmtree(map_repack_dir)
 	
 if len(all_maps) == 0:
 	update_map_list()
