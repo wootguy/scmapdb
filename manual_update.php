@@ -1,5 +1,4 @@
 <?php
-	
 	// Turn off output buffering
 	ini_set('output_buffering', 'off');
 	// Turn off PHP output compression
@@ -19,7 +18,7 @@
 	 
 	for($i = 0; $i < 8192; $i++)
 	{
-	echo ' ';
+		echo ' ';
 	}
 			 
 	ob_flush();
@@ -29,21 +28,18 @@
 	 
 	echo "Starting script...\n\n";
 
-	$cmd = "sudo /media/sda1/html/scmapdb/cmd.sh 2>&1";
+	$cmd = "sh /media/sda1/html/scmapdb/cmd.sh 2>&1";
 	//while (@ ob_end_flush()); // end all output buffers if any
 
 	$proc = popen($cmd, 'r');
 	@ flush();
 	while (!feof($proc))
 	{
-		echo fread($proc, 4096);
+		echo fread($proc, 4);
 		@ flush();
 	}
 	fclose($proc);
 	 
 	ob_flush();
 	flush();
-	
-
-	
 ?>

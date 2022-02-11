@@ -894,7 +894,7 @@ $( document ).ready( function() {
 		$(this).height(Math.floor($(this).height()/2)*2);
 		
 		var last_response_len = false;
-		$.ajax('manual_update.php', {
+		$.ajax('https://w00tguy.no-ip.org/scmapdb/manual_update.php', {
 			xhrFields: {
 				onprogress: function(e)
 				{
