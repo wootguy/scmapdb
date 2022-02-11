@@ -251,9 +251,9 @@ function load_map_div_contents(map) {
 		
 		map.find(".scrape .date").text(date);
 		map.find(".scrape .date").attr("title", time + " (this is when the archive was last downloaded and repacked)");
-		map.find(".new-archive").attr("href", "downloads/" + safe_name + "." + archive_ext);
-		map.find(".old-archive").attr("href", "cache/maps/" + safe_name + '.' + detail['old_ext']);
-		map.find(".ext-archive").attr("href", "downloads/" + safe_name + '_extras.' + archive_ext);
+		map.find(".new-archive").attr("href", "https://w00tguy.no-ip.org/scmapdb/downloads/" + safe_name + "." + archive_ext);
+		map.find(".old-archive").attr("href", "https://w00tguy.no-ip.org/scmapdb/cache/maps/" + safe_name + '.' + detail['old_ext']);
+		map.find(".ext-archive").attr("href", "https://w00tguy.no-ip.org/scmapdb/downloads/" + safe_name + '_extras.' + archive_ext);
 		map.find(".new-archive .size").text(pretty_size(detail['new_size']));
 		
 		var oldBytes = detail['old_size'];
