@@ -995,9 +995,9 @@ def repack_map_from_map_pack(mapname, bsp_filenames, packname):
 def fix_file_perms(path):
 	for subdir, dirs, files in os.walk(path):
 		for dir in dirs:
-			os.chmod(os.path.join(subdir, dir), stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+			os.chmod(os.path.join(subdir, dir), stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
 		for file in files:
-			os.chmod(os.path.join(subdir, file), stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH)
+			os.chmod(os.path.join(subdir, file), stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH)
 	
 def download_map(mapname, skip_cache=False):
 	global use_cache
@@ -2699,6 +2699,8 @@ if os.path.isfile(in_progress_name):
 	else:
 		print("Update in progress. Aborting.")
 		sys.exit(1)
+		
+os.umask(0)
 open(in_progress_name, "a").close()
 
 
@@ -2749,7 +2751,8 @@ if len(args) > 0:
 	
 	if args[0].lower() == 'fixperms':
 		fix_file_perms('.')
-		os.chmod('resguy', stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+		os.chmod('resguy', stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
+		os.chmod('cmd.sh', stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
 	if args[0].lower() == 'pool':
 		create_content_pool()
 	if args[0].lower() == 'pool_packs':
