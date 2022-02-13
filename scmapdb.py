@@ -2846,6 +2846,7 @@ if len(args) > 0:
 		subprocess.run(['git', 'add', logs_dir])
 		subprocess.run(['git', 'add', 'data.json'])
 		subprocess.run(['git', 'add', 'pool.json'])
+		subprocess.run(['git', 'add', 'maplist.txt'])
 		subprocess.run(['git', 'commit', '-m', 'automatic update'])
 		subprocess.run(['git', 'push'])
 		
