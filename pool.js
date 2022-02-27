@@ -2,6 +2,8 @@ var map_data = {};
 var pool_data = {};
 var file_tree;
 
+var data_domain = "https://wootdata.github.io/scmapdb_data/";
+
 function pretty_size(bytes) {
 	if (bytes === undefined) {
 		return "N/A";
@@ -473,11 +475,11 @@ $( document ).ready( function() {
 
 	load_hash_settings();
 	
-	$.getJSON("data.json", function(data1) {
+	$.getJSON(data_domain + "data.json", function(data1) {
 		map_data = data1;
 		console.log("Maps json: ", data1);
 		
-		$.getJSON("pool.json", function(data) {
+		$.getJSON(data_domain + "pool.json", function(data) {
 			pool_data = data;
 			console.log("Pool json: ", data);
 			
