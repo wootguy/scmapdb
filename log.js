@@ -16,6 +16,8 @@ var maxPage = Math.ceil(total_maps / mapsPerPage) - 1;
 var month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 var archive_ext = "zip";
 
+var data_domain = "https://wootdata.github.io/scmapdb_data/";
+
 function pretty_size(bytes) {
 	if (bytes === undefined) {
 		return "N/A";
@@ -138,7 +140,7 @@ function load_map_div_contents(map) {
 		return;
 	var key = map.attr("key");
 	
-	var jsonFile = "logs/" + safe_map_name(key) + ".json";
+	var jsonFile = data_domain + "logs/" + safe_map_name(key) + ".json";
 	
 	console.log("downloading: " + jsonFile);
 	var timestamp = new Date().getTime();
@@ -766,7 +768,7 @@ function compare_trees(tree1, tree2, path) {
 }
 
 function compare_jsons() {
-	$.getJSON("data_new.json", function(data) {
+	$.getJSON(data_domain + "data_new.json", function(data) {
 		var map_data2 = data;
 		var map_diff = {};
 		
@@ -943,13 +945,13 @@ $( document ).ready( function() {
 	console.log("Using data file: " + jsonFile);
 
 	console.log("Downloading pool json");
-	$.getJSON("pool.json", function(pool_dat) {
+	$.getJSON(data_domain + "pool.json", function(pool_dat) {
 		pool_data = pool_dat;
 		
 		console.log("Downloading map json");
 		var timestamp = new Date().getTime();
 		jsonFile += "?_=" + timestamp; // prevent caching
-		$.getJSON(jsonFile, function(data) {
+		$.getJSON(data_domain + jsonFile, function(data) {
 			map_data = data;
 			console.log("Map json: ", data);
 			
