@@ -2843,12 +2843,12 @@ if len(args) > 0:
 			
 		print("")
 		print("Pushing changes to github")
-		subprocess.run(['git', 'add', logs_dir])
-		subprocess.run(['git', 'add', 'data.json'])
-		subprocess.run(['git', 'add', 'pool.json'])
-		subprocess.run(['git', 'add', 'maplist.txt'])
-		subprocess.run(['git', 'commit', '-m', 'automatic update'])
-		subprocess.run(['git', 'push'])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', logs_dir])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', 'data.json'])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', 'pool.json'])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', 'maplist.txt'])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'commit', '-m', 'automatic update'])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'push'])
 		
 		print("")
 		print("UPDATE COMPLETE")
