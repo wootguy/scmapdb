@@ -8,3 +8,7 @@ data.json.recent
 pool.json.recent
 ent.py
 UPDATE_IN_PROGRESS
+logs/
+data.json
+pool.json
+maplist.txt
