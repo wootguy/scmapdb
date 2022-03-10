@@ -197,6 +197,9 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 				print("Dropbox links not supported")
 				continue
 			if 'gamebanana.com' in href:
+				print("GameBanana links not supported")
+				continue
+				'''
 				try:
 					# go through the download pages to get the REAL link
 					print("Searching through GameBanana download pages...")
@@ -217,6 +220,7 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 							href = dllink[0].attrib['href']
 				except Exception as e:
 					print(e)
+				'''
 			if 'mediafire.com' in href:
 				print("Link to mediafire ignored (bots aren't allowed to download from there).")
 				continue
