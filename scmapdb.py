@@ -30,7 +30,7 @@ verbose = True
 log_to_file = True
 include_readmes = True # include mapname_readme.txt files in the repack
 
-domain_name = 'http://scmapdb.com'
+domain_name = 'http://scmapdb.wikidot.com'
 
 # maps that won't be included in The Big One map pack due to file conflicts or something
 blacklisted_bigone_maps = ['afraid-of-monsters']
@@ -1054,7 +1054,7 @@ def download_map(mapname, skip_cache=False):
 			continue
 			
 		if len(ext) > 3:
-			ext = '7z'
+			ext = 'zip'
 			print("File extension unknown! Let's look at the HTTP header...")
 			try:
 				headers = requests.head(link, timeout=10).headers
@@ -1065,6 +1065,9 @@ def download_map(mapname, skip_cache=False):
 						continue
 					else:
 						print("Extension seems to be %s" % ext)
+				else:
+					print("Failed to get an extension from HTTP header")
+					continue
 			except:
 				print("Failed to get an extension from link: %s" % link)
 				continue
@@ -2847,7 +2850,7 @@ if len(args) > 0:
 			
 		print("")
 		print("Pushing changes to github")
-		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', logs_dir])
+		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', logs_dir, '-f'])
 		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', 'data.json'])
 		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', 'pool.json'])
 		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', 'maplist.txt'])
