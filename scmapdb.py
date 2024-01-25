@@ -33,10 +33,10 @@ include_readmes = True # include mapname_readme.txt files in the repack
 domain_name = 'http://scmapdb.wikidot.com'
 
 # maps that won't be included in The Big One map pack due to file conflicts or something
-blacklisted_bigone_maps = ['afraid-of-monsters']
+blacklisted_bigone_maps = ['afraid-of-monsters', 'absolute-redemption-for-sven-co-op']
 
 # maps that should be ignored since they're older versions of something, but are kept on the DB for historical purposes
-blacklisted_maps = ['afraid-of-monsters']
+blacklisted_maps = ['afraid-of-monsters', 'absolute-redemption-for-sven-co-op']
 
 all_maps = []
 default_content = []
@@ -2210,6 +2210,10 @@ def update_maps_quick():
 		
 		href = recent.cssselect('a')[0].attrib['href']
 		map = href.split("/map:")[-1]
+		
+		if map in blacklisted_maps:
+			continue
+		
 		has_new_revision = False
 		new_rev = int(recent.cssselect('table tr:nth-child(3) > td:nth-child(2)')[0].text_content())
 		has_new_revision = map not in master_json or int(master_json[map]['rev']) < new_rev	
@@ -2253,7 +2257,7 @@ def update_maps_quick():
 	# Check map count
 	mdom = html.fromstring(read_url_safe(domain_name))
 	
-	map_count = mdom.cssselect('.countbox table > tr:nth-child(1) > td.countnum p')
+	map_count = mdom.cssselect('div.countnum-new-cont:nth-child(2) > div:nth-child(1) > div:nth-child(1) > p:nth-child(1)')
 	if len(map_count):
 		map_count = int(map_count[0].text_content())
 	else:
@@ -2700,8 +2704,8 @@ if len(args) < 1 or args[0].lower() == 'help':
 	
 if os.path.isfile(in_progress_name):
 	age = (time.time() - os.path.getmtime(in_progress_name)) / (60*60)
-	if age > 2:
-		print("Ignoring update lock - file is over 2 hours old")
+	if age > 4:
+		print("Ignoring update lock - file is over 4 hours old")
 		os.remove(in_progress_name)
 	else:
 		print("Update in progress. Aborting.")
