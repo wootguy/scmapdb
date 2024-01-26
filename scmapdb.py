@@ -197,30 +197,30 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 				print("Dropbox links not supported")
 				continue
 			if 'gamebanana.com' in href:
-				print("GameBanana links not supported")
-				continue
-				'''
-				try:
-					# go through the download pages to get the REAL link
-					print("Searching through GameBanana download pages...")
-					at_second_page = '/download/' in href
-					gbdom = html.fromstring(read_url_safe(href))
-					href = ''
-					dlpage = gbdom.cssselect('#DownloadModule > div > div > a')
-					direct_link = gbdom.cssselect('#FilesModule .DownloadOptions > a')
-					
-					if len(direct_link) > 0:
-						href = direct_link[0].attrib['href']
-					elif len(dlpage) > 0 or at_second_page:
-						if not at_second_page:
-							dlpage = dlpage[0].attrib['href']
-							gbdom = html.fromstring(read_url_safe(dlpage))
-						dllink = gbdom.cssselect('#OfficialDirectDownload')
-						if len(dllink) > 0:
-							href = dllink[0].attrib['href']
-				except Exception as e:
-					print(e)
-				'''
+				#print("GameBanana links not supported")
+				#continue
+
+				# Gamebanana support -R4to0
+				gb = re.compile(r'^http(?:s)?:\/\/(?:www\.)?gamebanana\.com\/(?P<page>dl|mods(?:\/download)?)\/(?P<fileid>[0-9]+)$')
+				match = gb.search(href)
+				page = match.group('page')
+				fileid = match.group('fileid')
+
+				if page == 'dl':
+					# We don't need to do nothing
+					print("[Gamebanana] Detected direct link: %s" % href)
+				elif fileid.isnumeric():
+					# Fetch mod data from gamebanana api
+					try:
+						with urllib.request.urlopen("https://gamebanana.com/apiv7/Mod/%s?_csvProperties=_aFiles" % fileid) as gb_json:
+							gbdata = json.load(gb_json)
+							href = gbdata["_aFiles"][0]["_sDownloadUrl"] # assume index 0 always
+							print("[Gamebanana] GameBanana API returned URL: %s" % href)
+					except:
+						print("Failed to query GameBanana API. Mod ID: %s", fileid)
+				else:
+					print("Failed to resolve Gamebanana URL")
+					continue
 			if 'mediafire.com' in href:
 				print("Link to mediafire ignored (bots aren't allowed to download from there).")
 				continue
