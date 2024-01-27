@@ -58,6 +58,8 @@ map_pack_cache_dir = os.path.join(cache_dir, 'map_packs')
 page_cache_dir = os.path.join(cache_dir, 'pages')
 zip_level = "-mx1" # "-mx1"
 zip_type = "zip" # "7z"
+rsync_dst = open("rsync_dst.txt").read().strip() if os.path.exists('rsync_dst.txt') else ''
+rsync_port = '2022'
 file_permissions = stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH
 dom = None
 sound_exts = ['aiff', 'asf', 'asx', 'dls', 'flac', 'fsb', 'it', 'm3u', 'midi', 'mid', 'mod', 'mp2', 'pls', 
@@ -2851,7 +2853,13 @@ if len(args) > 0:
 		remove_unreferenced_pool_files()
 		with open(pool_json_name, 'w') as outfile:
 			json.dump(pool_json, outfile)
-			
+		
+		if rsync_dst:
+			print("")
+			print("Syncing to file server")
+			subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'downloads', rsync_dst])
+			subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'cache', rsync_dst])
+		
 		print("")
 		print("Pushing changes to github")
 		subprocess.run(['git', '--git-dir=.git_data', '--work-tree=.', 'add', logs_dir, '-f'])
