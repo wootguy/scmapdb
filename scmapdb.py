@@ -3,6 +3,28 @@
 # There's a bug somewhere that causes file handles to build up, so you might need to 
 # set "ulimit -n" to something high like 4096 (1024 isn't enough), make sure to do it for root too if using crontab
 
+# pip3 install lxml patool csselect
+
+# to set up pushing to multiple github accounts from a single user you need to create an .ssh/config file.
+# Be sure to use the ssh clone urls, not https. See the push commands in this script for git-dir usage.
+# What I did was clone to a separate folder then copy the .git from the other folder and rename to .git_data.
+# Example ssh config:
+'''
+Host github.com
+    HostName github.com
+    User wootguy
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes
+
+Host wootdata.github.com
+    HostName github.com
+    User wootdata 
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/wootdata
+    IdentitiesOnly yes
+'''
+
 # TODO / Feature requests:
 # scmapdb repack file recovered but it overwrites default content (decay I think, point_checkpoint.as)
 # scmapdb add "unreleased" category
@@ -58,6 +80,7 @@ map_pack_cache_dir = os.path.join(cache_dir, 'map_packs')
 page_cache_dir = os.path.join(cache_dir, 'pages')
 zip_level = "-mx1" # "-mx1"
 zip_type = "zip" # "7z"
+linux_7zip = '7zz'
 rsync_dst = open("rsync_dst.txt").read().strip() if os.path.exists('rsync_dst.txt') else ''
 rsync_port = '2022'
 file_permissions = stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH
@@ -202,27 +225,52 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 				#print("GameBanana links not supported")
 				#continue
 
-				# Gamebanana support -R4to0
-				gb = re.compile(r'^http(?:s)?:\/\/(?:www\.)?gamebanana\.com\/(?P<page>dl|mods(?:\/download)?)\/(?P<fileid>[0-9]+)$')
-				match = gb.search(href)
-				page = match.group('page')
-				fileid = match.group('fileid')
+				# Strip queries that start with # from href (for example '#FileInfo_<numbers>', they're not needed)
+				if '#' in href:
+					href = href.split('#')[0]
 
-				if page == 'dl':
-					# We don't need to do nothing
-					print("[Gamebanana] Detected direct link: %s" % href)
-				elif fileid.isnumeric():
-					# Fetch mod data from gamebanana api
-					try:
-						with urllib.request.urlopen("https://gamebanana.com/apiv7/Mod/%s?_csvProperties=_aFiles" % fileid) as gb_json:
-							gbdata = json.load(gb_json)
-							href = gbdata["_aFiles"][0]["_sDownloadUrl"] # assume index 0 always
-							print("[Gamebanana] GameBanana API returned URL: %s" % href)
-					except:
-						print("Failed to query GameBanana API. Mod ID: %s", fileid)
-				else:
-					print("Failed to resolve Gamebanana URL")
+				gbpttn = re.compile(r'^https?://(?:www\.)?(?:(?P<direct>files)\.)?gamebanana\.com/(?P<type>maps|dl|mods|gamefiles)(?:/download)?/(?P<id>.+)')
+				match = gbpttn.match(href)
+
+				if not match:
+					print("[Gamebanana] Failed to parse URL: %s" % href)
 					continue
+
+				direct, page_type, item_id = match.group('direct'), match.group('type'), match.group('id')
+
+				# Follow link redirect. This includes the following URIs: /maps and /gamefiles.
+				if page_type in ['maps', 'gamefiles']:
+					try:
+						with urllib.request.urlopen(href) as gb_html:
+							old_url = href
+							href = gb_html.geturl()
+							print("[Gamebanana] Redirected URL from %s to %s" % (old_url, href))
+					except:
+						print("[Gamebanana] Failed to follow URL %s" % href)
+						continue
+
+					# Refresh group match with new url. TODO: improve this, remove duplicate.
+					direct, page_type, item_id = match.group('direct'), match.group('type'), match.group('id')
+
+				# At this point we have links with /mods uri and we need to query the API for the download link.
+				if page_type == 'mods':
+					gbjson = None
+
+					# Note: API will throw a except if the mod ID is invalid. No need to check http error codes for now.
+					try:
+						with urllib.request.urlopen("https://gamebanana.com/apiv7/Mod/%s?_csvProperties=_aFiles" % item_id) as gb_data:
+							gbjson = json.load(gb_data)
+					except:
+						print("[Gamebanana] Failed to query API. Mod ID: %s, URL: %s" % (item_id, href))
+						continue
+
+					# There may be more than a single file in the mod id, we don't know which one to pick.
+					if len(gbjson["_aFiles"]) > 1:
+						print("[Gamebanana] Found multiple files in mod ID %s, skipping..." % item_id)
+						continue
+
+					# Let's hope the first and only file is the correct one.
+					href = gbjson["_aFiles"][0]["_sDownloadUrl"] # assume index 0 always exists
 			if 'mediafire.com' in href:
 				print("Link to mediafire ignored (bots aren't allowed to download from there).")
 				continue
@@ -489,7 +537,7 @@ def validate_archive(archive_path):
 	
 	if ext == '7z':
 		zip_archive_path = archive_path.replace('\\', '/')
-		program_name = "7za.exe" if platform.system() == "Windows" else "7za"
+		program_name = "7za.exe" if platform.system() == "Windows" else linux_7zip
 		try:
 			with open(os.devnull, 'w') as devnull:
 				args = [program_name, 'l', zip_archive_path]
@@ -552,7 +600,7 @@ def extract_archive(archive_path, out_path, bsp_name=""):
 	if ext == '7z':
 		zip_out_path = out_path.replace('\\', '/')
 		zip_archive_path = archive_path.replace('\\', '/')
-		program_name = "7za.exe" if platform.system() == "Windows" else "7za"
+		program_name = "7za.exe" if platform.system() == "Windows" else linux_7zip
 		try:
 			with open(os.devnull, 'w') as devnull:
 				args = [program_name, 'x', '-aos', '-o%s' % zip_out_path, zip_archive_path]
@@ -980,7 +1028,7 @@ def repack_map_from_map_pack(mapname, bsp_filenames, packname):
 		os.remove(out_path)
 	
 	os.chdir(pack_path)
-	program_path = os.path.join(work_dir,'7za.exe') if platform.system() == "Windows" else "7za"
+	program_path = os.path.join(work_dir,'7za.exe') if platform.system() == "Windows" else linux_7zip
 	try:
 		print("Compressing %s..." % out_name)
 		with open(os.devnull, 'w') as devnull:
@@ -1699,7 +1747,7 @@ def repack_map(mapname, ext, bsp_name=""):
 		os.remove(out_path)
 	
 	os.chdir(map_repack_dir)
-	program_path = os.path.join(work_dir,'7za.exe') if platform.system() == "Windows" else "7za"
+	program_path = os.path.join(work_dir,'7za.exe') if platform.system() == "Windows" else linux_7zip
 	try:
 		print("Compressing %s..." % out_name)
 		with open(os.devnull, 'w') as devnull:
@@ -1729,7 +1777,7 @@ def repack_map(mapname, ext, bsp_name=""):
 				os.remove(out_path_extra)
 			
 			os.chdir(map_repack_dir)
-			program_path = os.path.join(work_dir,'7za.exe') if platform.system() == "Windows" else "7za"
+			program_path = os.path.join(work_dir,'7za.exe') if platform.system() == "Windows" else linux_7zip
 			try:
 				print("Compressing %s..." % out_name_extra)
 				with open(os.devnull, 'w') as devnull:
@@ -1990,12 +2038,17 @@ def create_content_pool(bigone_mode=False, map_packs_only=False, bigone_extras=F
 		if os.path.isfile(out_path):
 			os.remove(out_path)
 			
-		program_path = os.path.join('..','7za.exe') if platform.system() == "Windows" else "7za"
+		program_path = os.path.join('..','7za.exe') if platform.system() == "Windows" else linux_7zip
 		try:
 			print("Compressing %s..." % out_name)
 			with open(os.devnull, 'w') as devnull:
 				#args = [program_path, 'a', '-mx1', '-tzip', '-mmt', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
-				args = [program_path, 'a', '-mx9', '-t7z', '-mmt=3', '-md=32m', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
+				
+				# lower mem requirements:
+				#args = [program_path, 'a', '-mx9', '-t7z', '-mmt=3', '-md=64m', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
+				
+				# higher mem requirements:
+				args = [program_path, 'a', '-mx9', '-t7z', '-md=1024m', '-scsUTF-8', '%s' % out_name, '@bigone_file_list.txt']
 				subprocess.check_call(args)
 		except Exception as e:
 			print(e)
@@ -2698,7 +2751,7 @@ if len(args) < 1 or args[0].lower() == 'help':
 	print("1. 'update'")
 	print("2. 'pool_packs' (add map packs to content pool)")
 	print("3. 'repack_all' (now that the pool is full, repack everything to recover missing files)")
-	print("4. 'update' on loop forever. Do 'repack_all' occaisionally to fix missing files")
+	print("4. 'update' on loop forever. Do 'repack_all' occasionally to fix missing files")
 	print("")
 	print("'ulimit -n' should be at least 4096 until the leaking file handle bug is fixed")
 	
@@ -2859,6 +2912,7 @@ if len(args) > 0:
 			print("Syncing to file server")
 			subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'downloads', rsync_dst])
 			subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'cache', rsync_dst])
+			#subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'content_pool', rsync_dst])
 		
 		print("")
 		print("Pushing changes to github")
