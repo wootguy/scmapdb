@@ -24,6 +24,7 @@ Host wootdata.github.com
     IdentityFile ~/.ssh/wootdata
     IdentitiesOnly yes
 '''
+# then change the remote url in .git_data/config to use "wootdata.github.com" instead of "github.com"
 
 # TODO / Feature requests:
 # scmapdb repack file recovered but it overwrites default content (decay I think, point_checkpoint.as)
@@ -262,6 +263,10 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 							gbjson = json.load(gb_data)
 					except:
 						print("[Gamebanana] Failed to query API. Mod ID: %s, URL: %s" % (item_id, href))
+						continue
+
+					if "_aFiles" not in gbjson or gbjson["_aFiles"] is None:
+						print("[Gamebanana] Missing file list in mod ID %s, skipping..." % item_id)
 						continue
 
 					# There may be more than a single file in the mod id, we don't know which one to pick.
@@ -2631,7 +2636,7 @@ def export_map_detail(mapKey):
 	del value['release_date']
 
 def read_url_safe(url, returnUrlInsteadOfPageData=False):
-	connection_attempts = 5 # connection attempts to make before giving up
+	connection_attempts = 3 # connection attempts to make before giving up
 	connection_backoff = [0, 15, 30, 60, 60] # seconds to wait after each attempt
 	
 	for attempt in range(0, connection_attempts):
@@ -2659,7 +2664,7 @@ def read_url_safe(url, returnUrlInsteadOfPageData=False):
 	clean_exit()
 	
 def download_file_safe(url, file_name):
-	connection_attempts = 20 # connection attempts to make before giving up
+	connection_attempts = 3 # connection attempts to make before giving up
 	connection_backoff = [0, 1, 2, 5, 10, 20, 30, 40, 50, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60] # seconds to wait after each attempt
 	
 
@@ -2693,8 +2698,9 @@ def download_file_safe(url, file_name):
 			print("ERROR IS: %s" % str(e))
 			print("ConnectionError downloading file (attempt %s of %s)" % (attempt+1, connection_attempts))
 
-	print("Failed to download file. Aborting.")
-	clean_exit()
+	print("Failed to download file. Aborting!")
+	#clean_exit()
+	raise Exception("Failed to download map")
 
 def load_the_big_guys():
 	global master_json
