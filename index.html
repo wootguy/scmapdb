@@ -31,63 +31,8 @@
 	</head>
 	<body>
 		<div class="main">
-			<h1>SCMapDB Resources</h1>
+			<h1>SCMapDB Repacker</h1>
 			<hr>
-			<br>
-			
-			<h2>The Bigger One</h2>
-			The ultimate Sven Co-op map pack (a successor to <a href="http://scmapdb.com/mappack:the-big-one-sc-v2">The Big One</a>). It includes every map uploaded to SCMapDB. More than that, it fixes tons of <a href="log.html#&&222220032">problems</a> present in the individual map archives.
-			<br><br>
-			Download (updated weekly, usually):
-			<!--
-			<div>
-				<a class="zip-link" href="https://drive.google.com/uc?id=1ZxY7eBkS1VOE0E4Ye1sC1cYwfGXHVKmN"></a> (10.8)
-			</div>
-			-->
-			<div>
-				<a class="7z-link" href="https://drive.google.com/uc?id=1CSRyo8MxkqIYKaTq_VxE3lLLfcbm9H57">SCMapDB_2024_11_03.7z</a> (11.1)
-			</div>
-            
-            <br>
-			
-            <div class="warn">
-				2024/12/09
-				<br>
-				This is no longer updated "weekly, usually". The pack has multiple problems:
-				<ul>
-				<li>
-					My VPS ran out of disk space.
-				</li>
-				<li>
-					"Community fixed" versions of maps have changes I disagree with. I want the original maps here instead.
-				</li>
-				<li>
-					Scripted maps will have broken .res files because the repacker can't accurately find assets referenced in scripts. I was told some scripted maps are missing assets too.
-				</li>
-				</ul>
-				<p>
-				I haven't been playing Sven Co-op for over a year now and don't intend to come back soon. I don't care to fix any of this. I still use the search feature in the repacker so at least that will keep running.
-				</p>
-				<p>
-				I'll keep this last link up for a while longer, but someone else may want to take over from here. The script for this has no instructions and I'm not willing to offer support for it. It may be easier to do your own thing. <a href="https://youtu.be/34XO1fOh3ls?list=FLNXbFSvHfrBXGneFT9la87g"> Now, begone co-op!</a>
-				</p>
-				<!--
-				<p>
-					Warning: This map pack is WIP and I haven't announced that it exists yet because SCMapDB has lots of 
-					<a href="/scmapdb/pool.html#&&&21211111111">conflicting files</a>. Some maps won't work properly until 
-					all conflicts are resolved.
-				</p>
-				<p>
-					Also, some scripted maps will have broken .res files. This map pack uses the repacker's .res files but
-					the original .res files probably have fewer missing files. <a href="https://github.com/wootguy/resguy">Resguy</a> doesn't work well on maps that
-					use scripts.
-				</p>
-				-->
-			</div>
-			
-			
-			<br>
-			<h2 id="repacker">Repack Tool</h2>
 			A <a href="/scmapdb/scmapdb.py">script</a> on this server downloads and repacks every map on <a href="http://scmapdb.com/">SCMapDB</a> to fix various problems, such as:
 			<ul>
 				<li>missing files</li>
@@ -99,13 +44,14 @@
 			</ul>
 			The bulk of the work is done by <a href="https://github.com/wootguy/resguy">resguy</a>. The script runs every hour to check for updates.
 			<h3><a href="log.html">Repack results</a></h3>
-			A filterable/searchable list of all maps that were repacked by the tool, each with a detailed view of changes.
+			A filterable list of all maps that were repacked by the tool, each with a detailed view of changes. This doubles as a working search feature for SCMapDB, which hasn't had a working search bar for several years.
 			<br><br>
-			IMPORTANT: maps with scripts in them may be repacked incorrectly. 
+			<div class="warn">
+			Warning: maps with scripts in them may be repacked incorrectly. 
 			It's sometimes impossible to know which files a script precaches, so the repacker likely deletes more than it should. 
-			For maps with scripts, the Big One Map pack will include all "unused" files in case some of them are actually required.
+			</div>
 			<h3><a href="pool.html">Content pool</a></h3>
-			A filterable/searchable list of every file that custom maps include. Files in this pool are used to recover missing files in map archives.
+			A filterable list of every file that custom maps include. Files in this pool are used to recover missing files in map archives.
 			<br><br>
 			Each file entry lists the map(s) that reference it. Files highlighted in red are conflicted and require a manual repack to fix.
 		</div>

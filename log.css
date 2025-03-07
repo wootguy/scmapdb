@@ -326,6 +326,7 @@ h1, h2  { font-size: 1em !important; }
 .perfect {
 	background: #fff;
 	box-shadow: 0 0 10px 1px black;
+	color: black;
 }
 .perfect.rape {
 	background: linear-gradient(60deg,red,orange,yellow,green,blue,violet,red,orange,yellow,green,blue,violet,red,orange);			
