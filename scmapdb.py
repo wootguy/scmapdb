@@ -2702,6 +2702,51 @@ def download_file_safe(url, file_name):
 	#clean_exit()
 	raise Exception("Failed to download map")
 
+def cleanup_cache_and_pool():
+	global all_maps
+	global pool_json
+	print("Cleanup time!")
+	
+	safe_map_names = [safe_map_name(x) for x in all_maps]
+	
+	for file in os.listdir('cache/maps'):
+		fname = os.path.splitext(file)[0]
+		if fname not in safe_map_names:
+			shutil.move(os.path.join('cache/maps', file), os.path.join("old_cache", file))
+			
+	for file in os.listdir('downloads'):
+		fname = os.path.splitext(file)[0]
+		if '.' in fname and fname not in safe_map_names:
+			os.remove(os.path.join('downloads', file))
+			
+	for root, dirs, files in os.walk('content_pool'):
+		for file in files:
+			file_path = os.path.join(root, file).replace("\\", "/")
+			rel_path = file_path.replace("content_pool/", "")
+			
+			parts = rel_path.split('/')
+			
+			in_pool = True
+			fpool = pool_json
+			for part in parts:
+				if part in fpool:
+					fpool = fpool[part]
+				else:
+					in_pool = False
+			
+			if not in_pool:
+				new_path = "old_content/" + rel_path
+				
+				if '@' not in new_path:
+					ext = os.path.splitext(os.path.basename(rel_path))[1]
+					mtime = os.path.getmtime(file_path)
+					new_path = new_path[:-(len(ext) + 1)] + '@' + base36(int(mtime / 60)) + ext
+				
+				print("Move %s to %s" % (file_path, new_path))
+				
+				os.makedirs(os.path.dirname(new_path), exist_ok=True)
+				shutil.move(file_path, new_path)
+
 def load_the_big_guys():
 	global master_json
 	global pool_json
@@ -2752,6 +2797,7 @@ if len(args) < 1 or args[0].lower() == 'help':
 	print("bigone - creates the content pool without any extras or conflicted files")
 	print("cache - refreshes the page and thumbnail caches")
 	print("cache_one [map] - refreshes the page and thumbnail cache for a specific map")
+	print("cleanup - move old versions of content to old_content and delete unused cache files")
 	print("")
 	print("First-time usage:")
 	print("1. 'update'")
@@ -2958,7 +3004,10 @@ if len(args) > 0:
 		remove_unreferenced_pool_files()
 		with open(pool_json_name, 'w') as outfile:
 			json.dump(pool_json, outfile)
-			
+	
+	if args[0].lower() == "cleanup":
+		cleanup_cache_and_pool()
+	
 	clean_exit()
 else:
 	load_the_big_guys()
