@@ -125,32 +125,31 @@ opener = urllib.request.build_opener()
 opener.addheaders = [('User-Agent','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30')]
 urllib.request.install_opener(opener)
 		  
-def read_cached_page(file):
+def read_cached_page(file, silent=False):
 	if os.path.isfile(file):
 		c = open(file, 'rb')
 		contents = c.read()
 		c.close()
 		if len(contents) > 0:
 			date = datetime.utcfromtimestamp( int(os.path.getmtime(file)) )
-			print("Using cached page (%s)" % date.strftime("%Y/%m/%d %H:%M UTC") )
+			if not silent:
+				print("Using cached page (%s)" % date.strftime("%Y/%m/%d %H:%M UTC") )
 			return contents
 		else:
 			os.remove(file)
 	return ''
 		
 
-def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
+def load_map_dom(mapname, is_map_pack, skip_cache, silent):
 	global dom
-	global use_cache
 	global map_json
-	global link_json
 	global page_cache_dir
 	
 	dl_type = 'mappack' if is_map_pack else 'map'
 	cache_path = os.path.join(page_cache_dir, '%s_%s.html' % (dl_type, safe_map_name(mapname))) 
 	thumb_path = os.path.join(page_cache_dir, 'img', '%s_%s.jpg' % (dl_type, safe_map_name(mapname))) 
 	
-	page_contents = read_cached_page(cache_path) if not skip_cache else ''
+	page_contents = read_cached_page(cache_path, silent) if not skip_cache else ''
 	
 	if not len(page_contents):
 		page_contents = ''
@@ -165,6 +164,12 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 	map_json['scrape_date'] = int(os.path.getmtime(cache_path))
 	
 	dom = html.fromstring(page_contents)
+
+def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
+	global dom
+	
+	load_map_dom(mapname, is_map_pack, skip_cache, False)
+	
 	links = dom.cssselect('#page-content div.dl a')
 	
 	# download the thumbnail
@@ -299,7 +304,7 @@ def get_map_urls(mapname, is_map_pack=False, skip_cache=False):
 		
 		
 # assumes dom is set
-def get_bsp_filenames():
+def get_bsp_filenames(mapname=""):
 	global dom
 	
 	if dom is None:
@@ -314,13 +319,23 @@ def get_bsp_filenames():
 				bsps = dom.cssselect('.wiki-content-table > tr:nth-child(%s) > td:nth-child(2)' % (i+1))
 				if (len(bsps)) > 0:
 					bsps = bsps[0].text_content()
-					return bsps.split(', ')
+					bsps = bsps.split(',')
+					
+					out_bsps = []
+					for bsp in bsps:
+						if '\n' in bsp:
+							for sub in bsp.split('\n'):
+								out_bsps.append(sub.replace(".bsp", "").strip())
+						else:
+							out_bsps.append(bsp.replace(".bsp", "").strip())
+					
+					return out_bsps
 				else:
 					print("bsp section didn't have any names in it")
 		else:
 			break
 
-	print("Failed to get BSP filenames")
+	print("Failed to get BSP filenames for '%s'" % mapname)
 
 def get_map_info():	
 	global dom
@@ -1067,7 +1082,7 @@ def download_map(mapname, skip_cache=False):
 		
 	safe_fname = safe_map_name(mapname)
 	links = get_map_urls(mapname)
-	bsp_filenames = get_bsp_filenames()
+	bsp_filenames = get_bsp_filenames(mapname)
 	info = get_map_info()
 	
 	map_json['title'] = info['title'] if 'title' in info else '???'
@@ -2702,6 +2717,30 @@ def download_file_safe(url, file_name):
 	#clean_exit()
 	raise Exception("Failed to download map")
 
+def dump_bsp_web_links():
+	global all_maps
+	
+	bsp_links_json = {}
+	
+	for map in all_maps:
+		load_map_dom(map, False, False, True)
+		bsps = get_bsp_filenames(map)
+		
+		if bsps:
+			for bsp in bsps:
+				if '(' in bsp or ')' in bsp or '*' in bsp:
+					continue # skip things like "hq2_* (20 maps)"
+				bsp = bsp.strip('"')
+				
+				if bsp not in bsp_links_json:
+					bsp_links_json[bsp] = []
+					
+				bsp_links_json[bsp].append(map)
+				#print("%s = %s" % (bsp, map))
+	
+	with open('bsp_links.json', 'w') as outfile:
+		json.dump(bsp_links_json, outfile)
+
 def cleanup_cache_and_pool():
 	global all_maps
 	global pool_json
@@ -2962,6 +3001,7 @@ if len(args) > 0:
 		if rsync_dst:
 			print("")
 			print("Syncing to file server")
+			# Remove "--delete" when manually rsyncing updates to old data folders, it delete remote data not present locally
 			subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'downloads', rsync_dst])
 			subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'cache', rsync_dst])
 			#subprocess.run(['rsync', '-e', 'ssh -p %s' % rsync_port, '-azP', '--delete', 'content_pool', rsync_dst])
@@ -3007,6 +3047,9 @@ if len(args) > 0:
 	
 	if args[0].lower() == "cleanup":
 		cleanup_cache_and_pool()
+		
+	if args[0].lower() == "dump_links":
+		dump_bsp_web_links()
 	
 	clean_exit()
 else:
